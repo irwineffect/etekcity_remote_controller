@@ -1,0 +1,24 @@
+format: 25 bits:
+0100010101010101001100110
+|____________||____||__||
+      a         b    c  d
+
+a: header
+ This is the same for all packets
+
+b: channel
+ ch1:010011
+ ch2:011100
+ ch3:110000
+ ch4:
+ ch5:
+c: off/off code
+ off: 1100
+ on : 0011
+d: tail
+ just a 0 on the end
+
+
+Bits appear to be encoded via pulse width. The window is about about 740 us
+A '1' is encoded as high for 520 us and low for 220 us
+A '0' is encoded as high for 150 us and low for 590 us

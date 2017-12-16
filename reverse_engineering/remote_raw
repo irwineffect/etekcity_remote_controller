@@ -1,0 +1,19 @@
+The following represets pulse widths (short/wide)
+
+>channel 1 on
+swssswswswswswswsswwsswws
+
+>channel 1 off
+swssswswswswswswsswwwwsss
+
+>channel 2 on
+swssswswswswswswwwsssswws
+
+>channel 2 off
+swssswswswswswswwwsswwsss
+
+>channel 3 on
+swssswswswswswwwsssssswws
+
+>channel 3 off
+swssswswswswswwwsssswwsss
