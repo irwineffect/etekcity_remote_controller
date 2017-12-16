@@ -42,7 +42,7 @@ class RemoteInterface():
         return self.preamble + \
                self.channel_codes[channel] + \
                self.on_off_codes[state] + \
-               "0\n"
+               "0" + chr(0)
 
 if __name__ == "__main__":
     r = RemoteInterface(None)
