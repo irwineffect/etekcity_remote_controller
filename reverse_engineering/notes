@@ -1,4 +1,5 @@
 format: 25 bits:
+--------------      -----
 0100010101010101001100110
 |____________||____||__||
       a         b    c  d
@@ -10,11 +11,13 @@ b: channel
  ch1:010011
  ch2:011100
  ch3:110000
- ch4:
- ch5:
+ ch4:010000 <-- Needs verification
+ ch5:010000 <-- Needs verification
+
 c: off/off code
  off: 1100
  on : 0011
+
 d: tail
  just a 0 on the end
 
