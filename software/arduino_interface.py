@@ -46,7 +46,10 @@ class RemoteInterface():
 
 if __name__ == "__main__":
     from serial import Serial
-    s = Serial("/dev/ttyACM0") 
+    import time
+    s = Serial("/dev/ttyACM0")
     r = RemoteInterface(s)
     r.set_state(1, 1)
+    time.sleep(5);
+    r.set_state(1, 0)
 
