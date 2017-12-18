@@ -1,6 +1,6 @@
 #include "Arduino.h"
 
-const uint8_t tx_pin = 0; //TODO update pin number when known
+const uint8_t tx_pin = 2; //TODO update pin number when known
 
 char rx_buffer[32];
 
