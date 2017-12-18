@@ -8,6 +8,8 @@ void setup()
 {
     pinMode(tx_pin, OUTPUT);
     digitalWrite(tx_pin, LOW);
+    Serial.begin(9600);
+    Serial.println("system initialized");
 }
 
 void tx_zero(void)
@@ -30,9 +32,10 @@ void loop()
 {
     Serial.println("---");
     Serial.print("waiting for packet...");
+    while (!Serial.available());
     uint8_t bytes_read =
         Serial.readBytesUntil('\0', rx_buffer, sizeof(rx_buffer));
-    Serial.print("\n");
+    Serial.print("\r\n");
 
     if (bytes_read != 25)
     {
@@ -40,13 +43,13 @@ void loop()
         Serial.print(bytes_read);
         Serial.println(" packet data:");
         Serial.write(rx_buffer);
-        Serial.print("\n");
+        Serial.print("\r\n");
         return;
     }
 
     Serial.println(" packet data:");
     Serial.write(rx_buffer);
-    Serial.print("\n");
+    Serial.print("\r\n");
 
     for (uint8_t i=0; i < bytes_read; ++i)
     {

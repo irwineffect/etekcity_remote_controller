@@ -45,7 +45,8 @@ class RemoteInterface():
                "0" + chr(0)
 
 if __name__ == "__main__":
-    r = RemoteInterface(None)
+    from serial import Serial
+    s = Serial("/dev/ttyACM0") 
+    r = RemoteInterface(s)
     r.set_state(1, 1)
-    r.set_state(1, 0)
 
