@@ -1,6 +1,6 @@
 #include "Arduino.h"
 
-const uint8_t tx_pin = 2; //TODO update pin number when known
+const uint8_t tx_pin = 7;
 
 char rx_buffer[32];
 
@@ -41,32 +41,38 @@ void loop()
     {
         Serial.print("invalid packet size: ");
         Serial.print(bytes_read);
-        Serial.println(" packet data:");
+        Serial.println("packet data:");
         Serial.write(rx_buffer);
         Serial.print("\r\n");
         return;
     }
 
-    Serial.println(" packet data:");
+    Serial.println("packet data:");
     Serial.write(rx_buffer);
     Serial.print("\r\n");
 
-    for (uint8_t i=0; i < bytes_read; ++i)
+    Serial.flush();
+    for (uint8_t j=0; j < 5; ++j)
     {
-        switch (rx_buffer[i])
+        for (uint8_t i=0; i < bytes_read; ++i)
         {
-            case '0':
-                tx_zero();
-                break;
-            case '1':
-                tx_one();
-                break;
-            default:
-                Serial.print("invalid character in packet: ");
-                Serial.println(rx_buffer[i]);
-                return;
+            switch (rx_buffer[i])
+            {
+                case '0':
+                    tx_zero();
+                    break;
+                case '1':
+                    tx_one();
+                    break;
+                default:
+                    Serial.print("invalid character in packet: ");
+                    Serial.println(rx_buffer[i]);
+                    return;
+            }
         }
+        delay(6);
     }
+    delay(100);
 
     Serial.println("transmit complete");
 }
