@@ -37,7 +37,6 @@ class RemoteInterface():
             else:
                 self.serial.write(code)
 
-
     def _gen_code(self, channel, state):
         return self.preamble + \
                self.channel_codes[channel] + \
