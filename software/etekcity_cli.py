@@ -1,17 +1,16 @@
 #!/usr/bin/python
 import argparse
-import serial
-from arduino_interface import RemoteInterface
+import socket
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
             description="Command line interface for controlling etekcity remote"
-            "controlled outlets",
+            "controlled outlets. Interfaces with etekcityd server.",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("channel", type=int, help="which channel to control")
     parser.add_argument("state", type=str, help="valid inputs: 1/on, 0/off")
-    parser.add_argument("--port", type=str, default="/dev/ttyACM0",
-            help="port that arduino is connected")
+    parser.add_argument("--ip", type=str, default="192.168.1.13",
+            help="ip address of etekcityd server")
     args = parser.parse_args()
 
     channel = args.channel
@@ -29,9 +28,8 @@ if __name__ == "__main__":
         exit(1)
     state = state_map[state]
 
-    serial = serial.Serial(args.port)
-    interface = RemoteInterface(serial)
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     print "setting channel {} to {}".format(channel, "ON" if state else "OFF")
-
-    interface.set_state(channel, state)
+    packet = chr(channel) + chr(state)
+    s.sendto(packet, (args.ip, 1666))
