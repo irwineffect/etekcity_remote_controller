@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import logging
-from daemon import runner
 import time
 import serial
 from arduino_interface import RemoteInterface
@@ -17,31 +16,33 @@ class App():
 
         formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-        self.logger = logging.getLogger("DaemonLog")
-        self.logger.setLevel(logging.INFO)
-        self.handler = logging.FileHandler("/var/log/etekcityd.log")
-        self.handler.setFormatter(formatter)
-        self.logger.addHandler(self.handler)
+        #logging = logging.Logger()
+        logging.basicConfig(level=logging.DEBUG)
+        #self.handler = logging.FileHandler("/var/log/etekcityd.log")
+        #self.handler.setFormatter(formatter)
+        #logging.addHandler(self.handler)
 
     def run(self):
-        self.logger.debug("opening serial port")
+        logging.debug("opening serial port")
         s = serial.Serial("/dev/ttyACM0")
-        self.logger.debug("creating arduino interface")
+        logging.debug("creating arduino interface")
         interface = RemoteInterface(s)
-        self.logger.debug("opening udp socket")
+        logging.debug("opening udp socket")
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.bind(("", 1666))
-        self.logger.info("etekcityd started on port 1666")
+        logging.info("etekcityd started on port 1666")
         while True:
+            logging.debug("waiting to receive UDP data")
             data, addr = s.recvfrom(2)
+            logging.debug("received UDP data")
             data = [ord(x) for x in data]
-            self.logger.info("received {}".format(data))
+            logging.info("received {}".format(data))
             [channel, state] = data
+            logging.debug("calling interface.set_state()")
             interface.set_state(channel, state)
+            logging.debug("finished calling interface.set_state()")
 
 
 if __name__ == "__main__":
     app = App()
-    daemon_runner = runner.DaemonRunner(app)
-    daemon_runner.daemon_context.files_preserve=[app.handler.stream]
-    daemon_runner.do_action()
+    app.run()

@@ -35,7 +35,11 @@ class RemoteInterface():
             if self.serial is None:
                 print code
             else:
+                print "writing data"
                 self.serial.write(code)
+                print "done writing data"
+                while self.serial.inWaiting():
+                    print self.serial.readline()
 
     def _gen_code(self, channel, state):
         return self.preamble + \
