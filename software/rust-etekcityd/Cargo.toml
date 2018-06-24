@@ -1,0 +1,8 @@
+[package]
+name = "rust-etekcityd"
+version = "0.1.0"
+authors = ["James Irwin <irwineffect@gmail.com>"]
+
+[dependencies]
+serialport = "2.1.0"
+bufstream = "0.1.3"
