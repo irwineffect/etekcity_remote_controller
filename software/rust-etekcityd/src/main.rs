@@ -6,12 +6,16 @@ use std::net;
 
 fn main() {
     //println!("ports: {:?}", serialport::posix::available_ports());
-    let s = match serialport::open("/dev/ttyACM0")
+    let mut s = match serialport::open("/dev/light_controller")
     {
         Ok(t) => t,
         Err(e) => panic!("failed opening port: {}", e)
 
     };
+
+    s.write_data_terminal_ready(true).unwrap();
+    std::thread::sleep(std::time::Duration::new(1,0));
+    s.write_data_terminal_ready(false).unwrap();
 
     let mut s = bufstream::BufStream::new(s);
 
