@@ -8,13 +8,13 @@ s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 @app.route("/", methods=['GET', 'POST'])
 def main():
     global s
-    print flask.request.method
+    print(flask.request.method)
     if flask.request.method == 'POST':
-        channel = flask.request.form.keys()[0]
+        channel = list(flask.request.form.keys())[0]
         state = flask.request.form[channel]
-        print "CH{} {}".format(channel, state)
+        print("CH{} {}".format(channel, state))
         packet = chr(int(channel)) + chr(1 if state == "ON" else 0)
-        s.sendto(packet, ('192.168.1.13', 1666))
+        s.sendto(packet.encode("ascii"), ('localhost', 1666))
     return flask.render_template('index.html')
 
 
