@@ -91,6 +91,7 @@ fn main() {
                 let channel: usize = udp_buf[0] as usize;
                 let state: usize = udp_buf[1] as usize;
 
+
                 if channel < 1 || channel > channel_codes.len()
                 {
                     println!("invalid channel");
@@ -103,6 +104,8 @@ fn main() {
                     println!("received {:#?} from {}: ", udp_buf, src);
                     continue;
                 }
+
+                println!("setting channel {} to {}", channel, state);
 
                 s.write(prefix).unwrap();
                 s.write(channel_codes[channel-1]).unwrap();
