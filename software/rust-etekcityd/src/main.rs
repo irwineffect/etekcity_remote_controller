@@ -3,6 +3,51 @@ extern crate bufstream;
 use std::io::BufRead;
 use std::io::Write;
 use std::net;
+use std::thread;
+use std::time::Duration;
+
+// use rumqttc::Incoming;
+// use rumqttc::Publish;
+
+extern crate rumqttc;
+
+fn mqtt_advertise(mqtt_client: &mut rumqttc::Client, channel: usize, id: &str) {
+    let discovery_msg = format!(r#"
+    {{
+        "name": "{id}",
+        "unique_id": "{id}",
+        "device_class": "switch",
+        "command_topic": "etekcityd/{channel}"
+    }}
+    "#);
+    mqtt_client.subscribe(format!("etekcityd/{channel}"), rumqttc::QoS::AtMostOnce).unwrap();
+    mqtt_client.publish(format!("homeassistant/switch/{channel}/config"), rumqttc::QoS::AtMostOnce, false, discovery_msg).unwrap();
+
+}
+
+const CHANNEL_CODES: [&[u8]; 5] = [ 
+                              "010011".as_bytes(),
+                              "011100".as_bytes(),
+                              "110000".as_bytes(),
+                              "010000".as_bytes(),
+                              "010000".as_bytes()
+                            ];
+
+fn control_channel(s: &mut impl Write, channel: usize, state: usize) {
+    let prefix = "01000101010101".as_bytes();
+    let suffix = "0\0".as_bytes();
+
+    
+    let on_off_codes = vec![ "1100".as_bytes(),
+                             "0011".as_bytes()
+                           ];
+
+    s.write(prefix).unwrap();
+    s.write(CHANNEL_CODES[channel-1]).unwrap();
+    s.write(on_off_codes[state]).unwrap();
+    s.write(suffix).unwrap();
+    s.flush().unwrap();
+}
 
 fn main() {
     //println!("ports: {:?}", serialport::posix::available_ports());
@@ -60,30 +105,65 @@ fn main() {
     s.flush();
     */
 
-    let prefix = "01000101010101".as_bytes();
-    let suffix = "0\0".as_bytes();
-
-    let channel_codes = vec![ "010011".as_bytes(),
-                              "011100".as_bytes(),
-                              "110000".as_bytes(),
-                              "010000".as_bytes(),
-                              "010000".as_bytes()
-                            ];
-
-    let on_off_codes = vec![ "1100".as_bytes(),
-                             "0011".as_bytes()
-                           ];
+    
 
     let socket = match net::UdpSocket::bind("0.0.0.0:1666")
     {
         Ok(s) => s,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}", e)
     };
+    socket.set_nonblocking(true).unwrap();
+
+    let (mut mqtt_client, mut mqtt_connection) = {
+        let options = rumqttc::MqttOptions::new("etekcityd", "telperion.lan", 1883);
+        rumqttc::Client::new(options, 10)
+    };
+
+    mqtt_advertise(&mut mqtt_client, 1, "den_fan");
+    mqtt_advertise(&mut mqtt_client, 3, "garage_lights");
+    mqtt_advertise(&mut mqtt_client, 4, "living_room_lights");
+    mqtt_advertise(&mut mqtt_client, 5, "test");
+
 
     let mut udp_buf: [u8; 2] = [0; 2];
 
-    loop
-    {
+    println!("starting main loop");
+    loop {
+
+        // Look for a MQTT message
+        match mqtt_connection.recv_timeout(Duration::from_millis(50)) {
+            Ok(Ok(rumqttc::Event::Incoming( rumqttc::mqttbytes::v4::Packet::Publish(msg)))) => {
+                let channel: usize = msg.topic.split("/").last().and_then(|s| s.parse().ok()).unwrap();
+                let state = if msg.payload  == "ON" {
+                    true
+                } else if msg.payload  == "OFF"  {
+                    false
+                }
+                else {
+                    println!("unexpected mqtt payload: {:?}", msg.payload);
+                    continue;
+                };
+
+                control_channel(&mut s, channel, state.into());
+                    
+            }
+            // Ok(Innotification) => {
+            // }
+            Err(rumqttc::RecvTimeoutError::Timeout) => {
+                // Timeout is ok
+            }
+            Ok(Err(e)) => {
+                dbg!(e);
+            }
+            Err(e) => {
+                dbg!(e);
+            }
+            _ => {
+                // Don't care
+            }
+        }
+
+        // Check UDP port
         match socket.recv_from(&mut udp_buf)
         {
             Ok((_, src)) =>
@@ -92,7 +172,7 @@ fn main() {
                 let state: usize = udp_buf[1] as usize;
 
 
-                if channel < 1 || channel > channel_codes.len()
+                if channel < 1 || channel > CHANNEL_CODES.len()
                 {
                     println!("invalid channel");
                     println!("received {:#?} from {}: ", udp_buf, src);
@@ -107,13 +187,15 @@ fn main() {
 
                 println!("setting channel {} to {}", channel, state);
 
-                s.write(prefix).unwrap();
-                s.write(channel_codes[channel-1]).unwrap();
-                s.write(on_off_codes[state]).unwrap();
-                s.write(suffix).unwrap();
-                s.flush().unwrap();
+                control_channel(&mut s, channel, state);
+
+              
             }
-            Err(e) => panic!(e)
+            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+            }
+            Err(e) => panic!("{}", e)
         }
+
+        thread::sleep(Duration::from_millis(50))
     }
 }

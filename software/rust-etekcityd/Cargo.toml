@@ -6,3 +6,4 @@ authors = ["James Irwin <irwineffect@gmail.com>"]
 [dependencies]
 serialport = "2.1.0"
 bufstream = "0.1.3"
+rumqttc = "0.20.0"
