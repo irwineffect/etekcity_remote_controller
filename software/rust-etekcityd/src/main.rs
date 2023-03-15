@@ -25,12 +25,12 @@ fn mqtt_advertise(mqtt_client: &mut rumqttc::Client, channel: usize, id: &str) {
 
 }
 
-const CHANNEL_CODES: [&[u8]; 5] = [ 
+const CHANNEL_CODES: [&[u8]; 4] = [ 
                               "010011".as_bytes(),
                               "011100".as_bytes(),
                               "110000".as_bytes(),
                               "010000".as_bytes(),
-                              "010000".as_bytes()
+                            //   "010000".as_bytes()
                             ];
 
 fn control_channel(s: &mut impl Write, channel: usize, state: usize) {
@@ -122,7 +122,6 @@ fn main() {
     mqtt_advertise(&mut mqtt_client, 1, "den_fan");
     mqtt_advertise(&mut mqtt_client, 3, "garage_lights");
     mqtt_advertise(&mut mqtt_client, 4, "living_room_lights");
-    mqtt_advertise(&mut mqtt_client, 5, "test");
 
 
     let mut udp_buf: [u8; 2] = [0; 2];
