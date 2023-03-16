@@ -21,7 +21,7 @@ fn mqtt_advertise(mqtt_client: &mut rumqttc::Client, channel: usize, id: &str) {
     }}
     "#);
     mqtt_client.subscribe(format!("etekcityd/{channel}"), rumqttc::QoS::AtMostOnce).unwrap();
-    mqtt_client.publish(format!("homeassistant/switch/{channel}/config"), rumqttc::QoS::AtMostOnce, false, discovery_msg).unwrap();
+    mqtt_client.publish(format!("homeassistant/switch/{channel}/config"), rumqttc::QoS::AtMostOnce, true, discovery_msg).unwrap();
 
 }
 
@@ -119,9 +119,9 @@ fn main() {
         rumqttc::Client::new(options, 10)
     };
 
-    mqtt_advertise(&mut mqtt_client, 1, "den_fan");
-    mqtt_advertise(&mut mqtt_client, 3, "garage_lights");
-    mqtt_advertise(&mut mqtt_client, 4, "living_room_lights");
+    mqtt_advertise(&mut mqtt_client, 1, "Den Fan");
+    mqtt_advertise(&mut mqtt_client, 3, "Garage Lights");
+    mqtt_advertise(&mut mqtt_client, 4, "Living Room Lights");
 
 
     let mut udp_buf: [u8; 2] = [0; 2];
