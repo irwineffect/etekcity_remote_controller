@@ -120,6 +120,7 @@ fn main() {
     };
 
     mqtt_advertise(&mut mqtt_client, 1, "Den Fan");
+    mqtt_advertise(&mut mqtt_client, 2, "Plant Light");
     mqtt_advertise(&mut mqtt_client, 3, "Garage Lights");
     mqtt_advertise(&mut mqtt_client, 4, "Living Room Lights");
 
